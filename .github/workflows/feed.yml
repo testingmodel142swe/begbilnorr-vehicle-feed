@@ -1,0 +1,23 @@
+name: Begbilnorr fordonsfeed
+on:
+  schedule:
+    - cron: '0 * * * *'      # varje timme -> nya bilar auto-in i katalogen
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install certifi
+      - run: python build_feed.py begbilnorr-vehicles-feed.csv
+      - name: commit om ändrad
+        run: |
+          git config user.name "feed-bot"
+          git config user.email "feed-bot@users.noreply.github.com"
+          git add begbilnorr-vehicles-feed.csv
+          git commit -m "auto: uppdatera fordonsfeed" || echo "inga ändringar"
+          git push || echo "inget att pusha"
